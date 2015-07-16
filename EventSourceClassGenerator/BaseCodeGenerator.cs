@@ -3,10 +3,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Alphaleonis.EventSourceClassGenerator
 {
@@ -63,7 +61,7 @@ namespace Alphaleonis.EventSourceClassGenerator
          m_codeFileNamespace = wszDefaultNamespace;
          m_progress = pGenerateProgress;
 
-         byte[] bytes = GenerateCode(wszInputFilePath, bstrInputFileContents);
+         byte[] bytes = GenerateCode(bstrInputFileContents);
 
          if (bytes == null)
          {
@@ -118,7 +116,7 @@ namespace Alphaleonis.EventSourceClassGenerator
       /// <summary>
       /// Interface to the VS shell object we use to tell our progress while we are generating
       /// </summary>
-      internal IVsGeneratorProgress Progress
+      internal IVsGeneratorProgress CodeGeneratorProgress
       {
          get
          {
@@ -141,7 +139,7 @@ namespace Alphaleonis.EventSourceClassGenerator
       /// </summary>
       /// <param name="inputFileContent">File contents as a string</param>
       /// <returns>The generated code file as a byte-array</returns>
-      protected abstract byte[] GenerateCode(string inputFilePath, string inputFileContent);
+      protected abstract byte[] GenerateCode(string inputFileContent);
 
       #endregion
 
@@ -153,7 +151,7 @@ namespace Alphaleonis.EventSourceClassGenerator
       /// <param name="column">Column number of error.</param>
       protected virtual void ReportError(string message, int line, int column)
       {
-         IVsGeneratorProgress progress = Progress;
+         IVsGeneratorProgress progress = CodeGeneratorProgress;
          if (progress != null)
          {
             progress.GeneratorError(0, 0, message, (uint)line, (uint)column);
@@ -162,7 +160,7 @@ namespace Alphaleonis.EventSourceClassGenerator
 
       protected virtual void ReportError(string message, object location)
       {
-         IVsGeneratorProgress progress = Progress;
+         IVsGeneratorProgress progress = CodeGeneratorProgress;
          EnvDTE.CodeElement codeElement = location as EnvDTE.CodeElement;
          if (progress != null)
          {
@@ -173,7 +171,7 @@ namespace Alphaleonis.EventSourceClassGenerator
 
       protected virtual void ReportWarning(string message, object location)
       {
-         IVsGeneratorProgress progress = Progress;
+         IVsGeneratorProgress progress = CodeGeneratorProgress;
          EnvDTE.CodeElement codeElement = location as EnvDTE.CodeElement;
          if (progress != null)
          {
@@ -188,7 +186,7 @@ namespace Alphaleonis.EventSourceClassGenerator
       /// <param name="column">Column number of warning.</param>
       protected virtual void ReportWarning(string message, int line, int column)
       {
-         IVsGeneratorProgress progress = Progress;
+         IVsGeneratorProgress progress = CodeGeneratorProgress;
          if (progress != null)
          {
             progress.GeneratorError(1, 0, message, (uint)line, (uint)column);
@@ -200,7 +198,7 @@ namespace Alphaleonis.EventSourceClassGenerator
       /// <param name="total">The maximum value for <paramref name="current"/>.</param>
       protected virtual void ReportProgress(int current, int total)
       {
-         IVsGeneratorProgress progress = Progress;
+         IVsGeneratorProgress progress = CodeGeneratorProgress;
          if (progress != null)
          {
             progress.Progress((uint)current, (uint)total);
